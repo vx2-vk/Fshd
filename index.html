@@ -87,14 +87,27 @@
             color: var(--neon-orange);
             text-shadow: var(--glow-spread-strong);
             margin-bottom: 20px;
-            animation: neonFlicker 1.5s infinite alternate;
             line-height: 1.2;
+            /* Default state for animation */
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+
+        /* Animation for when a name is received via URL */
+        .greeting-message.greeting-animated {
+            animation: neonFlicker 1.5s infinite alternate, welcomeScaleFade 1.5s ease-out forwards;
         }
 
         @keyframes neonFlicker {
             0% { text-shadow: var(--glow-spread-strong); opacity: 1; }
             50% { text-shadow: none; opacity: 0.8; }
             100% { text-shadow: var(--glow-spread-strong); opacity: 1; }
+        }
+
+        @keyframes welcomeScaleFade {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         .user-name-display {
@@ -169,7 +182,7 @@
             background-color: #25D366; /* WhatsApp green - kept as is for branding */
             color: white;
             box-shadow: 0 0 10px #25D366;
-            display: none; /* KEY CHANGE: Hidden by default */
+            display: none; /* Hidden by default */
         }
 
         .whatsapp-button:hover {
@@ -216,12 +229,14 @@
     </style>
 </head>
 <body>
+    <!-- Canvas for Firecracker Animation -->
     <canvas id="fireworksCanvas"></canvas>
 
     <div class="container">
+        <!-- GIF -->
         <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXd0a2p1ZjBmZGt0Nmo2NnRnb3UzencxamV3YjgwbHBoeGVuaHM4ayZlcD1wMV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ErwOniUoUCjUCteUln/giphy.gif" alt="Festive Celebration GIF" class="goddess-image">
 
-        <div class="greeting-message">మీకు శుభదీపావళి శుభాకాంక్షలు!</div>
+        <div class="greeting-message" id="greetingMessage">మీకు శుభదీపావళి శుభాకాంక్షలు!</div>
         <div class="user-name-display" id="userNameDisplay"></div>
 
         <div class="name-input-group">
@@ -243,24 +258,43 @@
             const nameInput = document.getElementById('nameInput');
             const userNameDisplay = document.getElementById('userNameDisplay');
             const whatsappShareButton = document.getElementById('whatsappShareButton');
+            const greetingMessageElement = document.getElementById('greetingMessage'); // New element reference
 
             // --- URL Parameter and Name Logic ---
-            const getUrlParameter = (name) => {
-                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-                const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            // Changed parameter name from 'name' to 'from'
+            const getUrlParameter = (paramName) => {
+                paramName = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                const regex = new RegExp('[\\?&]' + paramName + '=([^&#]*)');
                 const results = regex.exec(location.search);
                 return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
             };
 
-            const urlName = getUrlParameter('name');
-            if (urlName) {
-                nameInput.value = urlName;
-                userNameDisplay.textContent = urlName;
-                // If name is in URL, show WhatsApp button immediately as the link is already 'generated'
+            const fromName = getUrlParameter('from'); // Check for 'from' parameter
+            if (fromName) {
+                // If 'from' parameter exists (friend opened the link)
+                userNameDisplay.textContent = fromName; // Display sender's name
+                nameInput.value = ''; // Clear input for friend to type their name
+                nameInput.placeholder = 'మీ పేరు టైప్ చేయండి'; // Ensure placeholder is correct
+
+                // Update greeting message with sender's name
+                greetingMessageElement.textContent = `మీకు శుభదీపావళి శుభాకాంక్షలు, ${fromName} నుండి!`;
+                // Add animation class to greeting message
+                greetingMessageElement.classList.add('greeting-animated');
+
+                // Show WhatsApp button immediately
                 whatsappShareButton.style.display = 'flex';
+                updateShareLinks(); // Update share links with current state
             } else {
-                userNameDisplay.textContent = '';
-                whatsappShareButton.style.display = 'none'; // Ensure hidden if no name in URL
+                // If no 'from' parameter (original sender)
+                userNameDisplay.textContent = ''; // No name displayed initially
+                nameInput.value = ''; // Ensure input is empty
+                nameInput.placeholder = 'మీ పేరు టైప్ చేయండి'; // Default placeholder
+
+                // Default greeting message
+                greetingMessageElement.textContent = 'మీకు శుభదీపావళి శుభాకాంక్షలు!';
+                greetingMessageElement.classList.remove('greeting-animated'); // Ensure animation class is not present
+
+                whatsappShareButton.style.display = 'none'; // Hide WhatsApp button
             }
 
             nameInput.addEventListener('input', () => {
@@ -276,21 +310,22 @@
 
             // --- Share Link Logic ---
             const updateShareLinks = () => {
-                const currentName = nameInput.value;
+                const currentName = nameInput.value.trim(); // Get name from input box
                 const baseUrl = window.location.origin + window.location.pathname;
-                const linkToShare = currentName ? `${baseUrl}?name=${encodeURIComponent(currentName)}` : baseUrl;
+                // Use 'from' parameter for the shareable link
+                const linkToShare = currentName ? `${baseUrl}?from=${encodeURIComponent(currentName)}` : baseUrl;
 
-                // Telugu greeting message
-                const greetingMessage = `మీకు శుభదీపావళి శుభాకాంక్షలు, ${currentName || 'అందరికీ'}! ఈ శుభాకాంక్షలు చూడండి: `;
-                whatsappShareButton.href = `https://wa.me/?text=${encodeURIComponent(greetingMessage)}${encodeURIComponent(linkToShare)}`;
+                // Message for WhatsApp
+                const whatsappText = `మీకు శుభదీపావళి శుభాకాంక్షలు, ${currentName || 'అందరికీ'}! ఈ శుభాకాంక్షలు చూడండి: `;
+                whatsappShareButton.href = `https://wa.me/?text=${encodeURIComponent(whatsappText)}${encodeURIComponent(linkToShare)}`;
             };
 
             updateShareLinks(); // Initial update when page loads
 
             window.generateAndShareLink = async () => {
-                const currentName = nameInput.value;
+                const currentName = nameInput.value.trim();
                 const baseUrl = window.location.origin + window.location.pathname;
-                const linkToCopy = currentName ? `${baseUrl}?name=${encodeURIComponent(currentName)}` : baseUrl;
+                const linkToCopy = currentName ? `${baseUrl}?from=${encodeURIComponent(currentName)}` : baseUrl; // Use 'from' parameter
 
                 try {
                     const tempInput = document.createElement('textarea');
@@ -301,8 +336,7 @@
                     document.body.removeChild(tempInput);
                     alert('లింక్ కాపీ చేయబడింది! ఇప్పుడు షేర్ చేయండి. \nLink copied! Now share it.');
 
-                    // Show WhatsApp button after link is generated/copied
-                    whatsappShareButton.style.display = 'flex';
+                    whatsappShareButton.style.display = 'flex'; // Show WhatsApp button
                     updateShareLinks(); // Ensure WhatsApp link is updated with current name
                 } catch (err) {
                     console.error('Failed to copy: ', err);
@@ -372,8 +406,8 @@
                         this.trail.push({ x: this.x, y: this.y, alpha: 1, size: Math.random() * 1.5 + 0.5 });
                         if (this.trail.length > 20) this.trail.shift();
 
-                        const distanceCovered = Math.hypot(this.x - (canvas.width / 2), this.y - canvas.height);
-                        if (distanceCovered >= this.targetY || this.y < this.targetY) { /* Changed condition to use targetY directly */
+                        // Check if rocket has reached or passed its target Y coordinate
+                        if (this.y <= this.targetY) {
                             this.explode();
                         } else {
                             this.x += this.vx;
@@ -457,8 +491,4 @@
             }
 
             setInterval(createFirecracker, 1500);
-            animate();
-        });
-    </script>
-</body>
-</html>
+            ani
