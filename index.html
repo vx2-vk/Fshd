@@ -169,6 +169,8 @@
             background-color: #25D366; /* WhatsApp green - kept as is for branding */
             color: white;
             box-shadow: 0 0 10px #25D366;
+            /* Hidden by default, shown on click of generate link button */
+            display: none; /* KEY CHANGE: Hide WhatsApp button by default */
         }
 
         .whatsapp-button:hover {
@@ -220,7 +222,7 @@
 
     <div class="container">
         <!-- GIF from previous request, now displaying in full rectangular form -->
-        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXd0a2p1ZjBmZGt0Nmo2NnRnb3UzencxamV3YjgwbHBoeGVuaHM4ayZlcD1wMV9pbnRlcm5ubF9naWZfYnlfaWQmY3Q9Zw/ErwOniUoUCjUCteUln/giphy.gif" alt="Festive Celebration GIF" class="goddess-image">
+        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXd0a2p1ZjBmZGt0Nmo2NnRnb3UzencxamV3YjgwbHBoeGVuaHM4ayZlcD1wMV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ErwOniUoUCjUCteUln/giphy.gif" alt="Festive Celebration GIF" class="goddess-image">
 
         <div class="greeting-message">మీకు శుభదీపావళి శుభాకాంక్షలు!</div>
         <div class="user-name-display" id="userNameDisplay"></div>
@@ -257,13 +259,22 @@
             if (urlName) {
                 nameInput.value = urlName;
                 userNameDisplay.textContent = urlName;
+                // If name is in URL, show WhatsApp button immediately
+                whatsappShareButton.style.display = 'flex'; // Show WhatsApp button
             } else {
                 userNameDisplay.textContent = '';
+                whatsappShareButton.style.display = 'none'; // Ensure hidden if no name in URL
             }
 
             nameInput.addEventListener('input', () => {
                 userNameDisplay.textContent = nameInput.value;
                 updateShareLinks();
+                // If user starts typing, show WhatsApp button
+                if (nameInput.value.trim() !== '') {
+                    whatsappShareButton.style.display = 'flex';
+                } else {
+                    whatsappShareButton.style.display = 'none';
+                }
             });
 
             // --- Share Link Logic ---
@@ -276,7 +287,7 @@
                 whatsappShareButton.href = `https://wa.me/?text=${encodeURIComponent(greetingMessage)}${encodeURIComponent(linkToShare)}`;
             };
 
-            updateShareLinks();
+            updateShareLinks(); // Initial update when page loads
 
             window.generateAndShareLink = async () => {
                 const currentName = nameInput.value;
@@ -291,6 +302,10 @@
                     document.execCommand('copy');
                     document.body.removeChild(tempInput);
                     alert('లింక్ కాపీ చేయబడింది! ఇప్పుడు షేర్ చేయండి. \nLink copied! Now share it.');
+
+                    // KEY CHANGE: Show WhatsApp button after link is generated/copied
+                    whatsappShareButton.style.display = 'flex';
+                    updateShareLinks(); // Ensure WhatsApp link is updated with current name
                 } catch (err) {
                     console.error('Failed to copy: ', err);
                     alert('లింక్‌ని కాపీ చేయడంలో విఫలమైంది. దయచేసి మాన్యువల్‌గా కాపీ చేయండి: ' + linkToCopy + '\nFailed to copy the link. Please copy it manually.');
@@ -381,7 +396,7 @@
                         this.trail.forEach(p => {
                             ctx.beginPath();
                             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                            ctx.fillStyle = `hsla(${p.color || this.trailColor.match(/\d+/)[0]}, 100%, 70%, ${p.alpha})`; /* Use p.color if available, otherwise trailColor */
+                            ctx.fillStyle = `hsla(${p.color || this.trailColor.match(/\d+/)[0]}, 100%, 70%, ${p.alpha})`;
                             ctx.fill();
                             p.alpha -= 0.05;
                         });
@@ -448,5 +463,4 @@
         });
     </script>
 </body>
-  </html>
-  
+</html>
