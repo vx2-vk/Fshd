@@ -31,16 +31,16 @@
             flex-direction: column;
         }
 
-        /* Canvas for Firecracker Animation - NOW IN FRONT */
+        /* Canvas for Firecracker Animation - In Front, Fully Responsive */
         #fireworksCanvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2; /* Changed to a positive value to bring it to the front */
-            pointer-events: none; /* Crucial: Allows clicks/touches to pass through to elements below */
-            background-color: transparent; /* Changed to transparent so the black body background is visible */
+            z-index: 2; /* In front of the content card */
+            pointer-events: none; /* Allows clicks/touches to pass through to elements below */
+            background-color: transparent; /* Transparent so the black body background is visible */
         }
 
         .container {
@@ -58,7 +58,7 @@
             animation: fadeIn 1.5s ease-out;
             margin: 20px;
             transition: all 0.3s ease-in-out;
-            z-index: 1; /* Ensures content card is still interactive and below fireworks (visually) */
+            z-index: 1; /* Ensures content card is interactive */
         }
 
         @keyframes fadeIn {
@@ -169,8 +169,7 @@
             background-color: #25D366; /* WhatsApp green - kept as is for branding */
             color: white;
             box-shadow: 0 0 10px #25D366;
-            /* Hidden by default, shown on click of generate link button */
-            display: none; /* KEY CHANGE: Hide WhatsApp button by default */
+            display: none; /* KEY CHANGE: Hidden by default */
         }
 
         .whatsapp-button:hover {
@@ -187,16 +186,16 @@
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
-                width: 95%; /* Adjust width for smaller screens */
+                width: 95%;
             }
 
             .greeting-message {
-                font-size: 1.6em; /* Smaller font on mobile */
+                font-size: 1.6em;
             }
 
             .goddess-image {
-                width: 100%; /* Ensure it's still responsive within container */
-                max-width: 250px; /* Optional: Limit max width on smaller screens if the GIF is very wide */
+                width: 100%;
+                max-width: 250px;
             }
 
             .user-name-display {
@@ -217,11 +216,9 @@
     </style>
 </head>
 <body>
-    <!-- Canvas for Firecracker Animation -->
     <canvas id="fireworksCanvas"></canvas>
 
     <div class="container">
-        <!-- GIF from previous request, now displaying in full rectangular form -->
         <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXd0a2p1ZjBmZGt0Nmo2NnRnb3UzencxamV3YjgwbHBoeGVuaHM4ayZlcD1wMV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ErwOniUoUCjUCteUln/giphy.gif" alt="Festive Celebration GIF" class="goddess-image">
 
         <div class="greeting-message">మీకు శుభదీపావళి శుభాకాంక్షలు!</div>
@@ -259,8 +256,8 @@
             if (urlName) {
                 nameInput.value = urlName;
                 userNameDisplay.textContent = urlName;
-                // If name is in URL, show WhatsApp button immediately
-                whatsappShareButton.style.display = 'flex'; // Show WhatsApp button
+                // If name is in URL, show WhatsApp button immediately as the link is already 'generated'
+                whatsappShareButton.style.display = 'flex';
             } else {
                 userNameDisplay.textContent = '';
                 whatsappShareButton.style.display = 'none'; // Ensure hidden if no name in URL
@@ -269,7 +266,7 @@
             nameInput.addEventListener('input', () => {
                 userNameDisplay.textContent = nameInput.value;
                 updateShareLinks();
-                // If user starts typing, show WhatsApp button
+                // Show WhatsApp button if user starts typing, hide if input is empty
                 if (nameInput.value.trim() !== '') {
                     whatsappShareButton.style.display = 'flex';
                 } else {
@@ -283,6 +280,7 @@
                 const baseUrl = window.location.origin + window.location.pathname;
                 const linkToShare = currentName ? `${baseUrl}?name=${encodeURIComponent(currentName)}` : baseUrl;
 
+                // Telugu greeting message
                 const greetingMessage = `మీకు శుభదీపావళి శుభాకాంక్షలు, ${currentName || 'అందరికీ'}! ఈ శుభాకాంక్షలు చూడండి: `;
                 whatsappShareButton.href = `https://wa.me/?text=${encodeURIComponent(greetingMessage)}${encodeURIComponent(linkToShare)}`;
             };
@@ -303,7 +301,7 @@
                     document.body.removeChild(tempInput);
                     alert('లింక్ కాపీ చేయబడింది! ఇప్పుడు షేర్ చేయండి. \nLink copied! Now share it.');
 
-                    // KEY CHANGE: Show WhatsApp button after link is generated/copied
+                    // Show WhatsApp button after link is generated/copied
                     whatsappShareButton.style.display = 'flex';
                     updateShareLinks(); // Ensure WhatsApp link is updated with current name
                 } catch (err) {
@@ -375,7 +373,7 @@
                         if (this.trail.length > 20) this.trail.shift();
 
                         const distanceCovered = Math.hypot(this.x - (canvas.width / 2), this.y - canvas.height);
-                        if (distanceCovered >= this.distanceToTarget || this.y < this.targetY) {
+                        if (distanceCovered >= this.targetY || this.y < this.targetY) { /* Changed condition to use targetY directly */
                             this.explode();
                         } else {
                             this.x += this.vx;
@@ -396,7 +394,7 @@
                         this.trail.forEach(p => {
                             ctx.beginPath();
                             ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                            ctx.fillStyle = `hsla(${p.color || this.trailColor.match(/\d+/)[0]}, 100%, 70%, ${p.alpha})`;
+                            ctx.fillStyle = `hsla(${this.trailColor.match(/\d+/)[0]}, 100%, 70%, ${p.alpha})`;
                             ctx.fill();
                             p.alpha -= 0.05;
                         });
