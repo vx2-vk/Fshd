@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festive Greetings!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto+Mono:wght@400&family=Open+Sans:wght@400&display=swap');
+
+        :root {
+            --neon-orange: #FF8C00; /* Vibrant Orange */
+            --black-bg: #000000;
+            --glow-spread-light: 0 0 8px var(--neon-orange), 0 0 15px var(--neon-orange);
+            --glow-spread-medium: 0 0 15px var(--neon-orange), 0 0 30px var(--neon-orange), 0 0 45px var(--neon-orange);
+            --glow-spread-strong: 0 0 20px var(--neon-orange), 0 0 40px var(--neon-orange), 0 0 60px var(--neon-orange);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--black-bg);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        /* Canvas for Firecracker Animation - NOW IN FRONT */
+        #fireworksCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2; /* Changed to a positive value to bring it to the front */
+            pointer-events: none; /* Crucial: Allows clicks/touches to pass through to elements below */
+            background-color: transparent; /* Changed to transparent so the black body background is visible */
+        }
+
+        .container {
+            position: relative;
+            background-color: #1a1a1a;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid var(--neon-orange); /* Glowing border */
+            box-shadow: var(--glow-spread-medium); /* Outer glow */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 90%;
+            width: 380px;
+            animation: fadeIn 1.5s ease-out;
+            margin: 20px;
+            transition: all 0.3s ease-in-out;
+            z-index: 1; /* Ensures content card is still interactive and below fireworks (visually) */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .goddess-image {
+            width: 100%; /* Make GIF responsive to container width */
+            height: auto; /* Maintain aspect ratio */
+            box-shadow: var(--glow-spread-light); /* Keep the glow effect */
+            margin-bottom: 25px;
+            animation: pulse 2s infinite alternate;
+            transition: all 0.3s ease-in-out;
+            border-radius: 8px; /* Slightly rounded corners for the rectangular GIF */
+        }
+
+        @keyframes pulse {
+            from { box-shadow: 0 0 5px var(--neon-orange), 0 0 10px var(--neon-orange); }
+            to { box-shadow: 0 0 15px var(--neon-orange), 0 0 30px var(--neon-orange); }
+        }
+
+        .greeting-message {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2em;
+            color: var(--neon-orange);
+            text-shadow: var(--glow-spread-strong);
+            margin-bottom: 20px;
+            animation: neonFlicker 1.5s infinite alternate;
+            line-height: 1.2;
+        }
+
+        @keyframes neonFlicker {
+            0% { text-shadow: var(--glow-spread-strong); opacity: 1; }
+            50% { text-shadow: none; opacity: 0.8; }
+            100% { text-shadow: var(--glow-spread-strong); opacity: 1; }
+        }
+
+        .user-name-display {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.4em;
+            color: white;
+            margin-bottom: 25px;
+            text-shadow: 0 0 8px #fff, 0 0 15px var(--neon-orange), 0 0 25px var(--neon-orange);
+            min-height: 1.4em; /* To prevent layout shift when name is empty */
+        }
+
+        .name-input-group {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .name-input {
+            width: calc(100% - 20px);
+            padding: 12px;
+            border: 2px solid var(--neon-orange);
+            border-radius: 8px;
+            background-color: #0d0d0d;
+            color: var(--neon-orange);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1em;
+            box-shadow: var(--glow-spread-light);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .name-input::placeholder {
+            color: rgba(255, 140, 0, 0.7); /* Orange placeholder */
+        }
+
+        .name-input:focus {
+            box-shadow: 0 0 10px var(--neon-orange), 0 0 20px var(--neon-orange);
+            transform: translateY(-1px);
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .action-button {
+            background-color: var(--neon-orange);
+            color: var(--black-bg);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--neon-orange);
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            letter-spacing: 0.5px;
+        }
+
+        .action-button:hover {
+            background-color: #e67e00; /* Slightly darker orange */
+            box-shadow: 0 0 15px var(--neon-orange), 0 0 30px var(--neon-orange);
+            transform: translateY(-2px);
+        }
+
+        .whatsapp-button {
+            background-color: #25D366; /* WhatsApp green - kept as is for branding */
+            color: white;
+            box-shadow: 0 0 10px #25D366;
+        }
+
+        .whatsapp-button:hover {
+            background-color: #1DA851; /* Darker WhatsApp green */
+            box-shadow: 0 0 15px #25D366, 0 0 30px #25D366;
+        }
+
+        .button-icon {
+            margin-right: 8px;
+            font-size: 1.3em;
+        }
+
+        /* Responsive adjustments for overall layout */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                width: 95%; /* Adjust width for smaller screens */
+            }
+
+            .greeting-message {
+                font-size: 1.6em; /* Smaller font on mobile */
+            }
+
+            .goddess-image {
+                width: 100%; /* Ensure it's still responsive within container */
+                max-width: 250px; /* Optional: Limit max width on smaller screens if the GIF is very wide */
+            }
+
+            .user-name-display {
+                font-size: 1.2em;
+            }
+
+            .action-button {
+                font-size: 1em;
+                padding: 10px 15px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas for Firecracker Animation -->
+    <canvas id="fireworksCanvas"></canvas>
+
+    <div class="container">
+        <!-- GIF from previous request, now displaying in full rectangular form -->
+        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXd0a2p1ZjBmZGt0Nmo2NnRnb3UzencxamV3YjgwbHBoeGVuaHM4ayZlcD1wMV9pbnRlcm5ubF9naWZfYnlfaWQmY3Q9Zw/ErwOniUoUCjUCteUln/giphy.gif" alt="Festive Celebration GIF" class="goddess-image">
+
+        <div class="greeting-message">మీకు శుభదీపావళి శుభాకాంక్షలు!</div>
+        <div class="user-name-display" id="userNameDisplay"></div>
+
+        <div class="name-input-group">
+            <input type="text" id="nameInput" class="name-input" placeholder="మీ పేరు టైప్ చేయండి">
+        </div>
+
+        <div class="button-group">
+            <button class="action-button" onclick="generateAndShareLink()">
+                <span class="button-icon">🎁</span> లింక్ తయారు చేసి షేర్ చేయండి
+            </button>
+            <a href="#" id="whatsappShareButton" class="action-button whatsapp-button">
+                <span class="button-icon">&#x1F4AC;</span> WhatsApp లో షేర్ చేయండి
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nameInput = document.getElementById('nameInput');
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            const whatsappShareButton = document.getElementById('whatsappShareButton');
+
+            // --- URL Parameter and Name Logic ---
+            const getUrlParameter = (name) => {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                const results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            };
+
+            const urlName = getUrlParameter('name');
+            if (urlName) {
+                nameInput.value = urlName;
+                userNameDisplay.textContent = urlName;
+            } else {
+                userNameDisplay.textContent = '';
+            }
+
+            nameInput.addEventListener('input', () => {
+                userNameDisplay.textContent = nameInput.value;
+                updateShareLinks();
+            });
+
+            // --- Share Link Logic ---
+            const updateShareLinks = () => {
+                const currentName = nameInput.value;
+                const baseUrl = window.location.origin + window.location.pathname;
+                const linkToShare = currentName ? `${baseUrl}?name=${encodeURIComponent(currentName)}` : baseUrl;
+
+                const greetingMessage = `మీకు శుభదీపావళి శుభాకాంక్షలు, ${currentName || 'అందరికీ'}! ఈ శుభాకాంక్షలు చూడండి: `;
+                whatsappShareButton.href = `https://wa.me/?text=${encodeURIComponent(greetingMessage)}${encodeURIComponent(linkToShare)}`;
+            };
+
+            updateShareLinks();
+
+            window.generateAndShareLink = async () => {
+                const currentName = nameInput.value;
+                const baseUrl = window.location.origin + window.location.pathname;
+                const linkToCopy = currentName ? `${baseUrl}?name=${encodeURIComponent(currentName)}` : baseUrl;
+
+                try {
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = linkToCopy;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    alert('లింక్ కాపీ చేయబడింది! ఇప్పుడు షేర్ చేయండి. \nLink copied! Now share it.');
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                    alert('లింక్‌ని కాపీ చేయడంలో విఫలమైంది. దయచేసి మాన్యువల్‌గా కాపీ చేయండి: ' + linkToCopy + '\nFailed to copy the link. Please copy it manually.');
+                }
+            };
+
+            // --- Firecracker Animation Logic ---
+            const canvas = document.getElementById('fireworksCanvas');
+            const ctx = canvas.getContext('2d');
+            let fireworks = [];
+            let particles = [];
+            const gravity = 0.05;
+
+            function setCanvasSize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            setCanvasSize();
+            window.addEventListener('resize', setCanvasSize);
+
+            class Particle {
+                constructor(x, y, vx, vy, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.vx = vx;
+                    this.vy = vy;
+                    this.color = color;
+                    this.alpha = 1;
+                    this.decay = Math.random() * 0.015 + 0.005;
+                    this.size = Math.random() * 2 + 1;
+                }
+
+                update() {
+                    this.vy += gravity;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha -= this.decay;
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha})`;
+                    ctx.fill();
+                }
+            }
+
+            class Firecracker {
+                constructor(startX, startY, targetX, targetY) {
+                    this.x = startX;
+                    this.y = startY;
+                    this.targetX = targetX;
+                    this.targetY = targetY;
+                    this.distanceToTarget = Math.hypot(targetX - startX, targetY - startY);
+                    this.angle = Math.atan2(targetY - startY, targetX - startX);
+                    this.vx = Math.cos(this.angle) * (Math.random() * 5 + 3);
+                    this.vy = Math.sin(this.angle) * (Math.random() * 5 + 3);
+                    this.particles = [];
+                    this.exploded = false;
+                    this.trail = [];
+                    this.trailColor = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                }
+
+                update() {
+                    if (!this.exploded) {
+                        this.trail.push({ x: this.x, y: this.y, alpha: 1, size: Math.random() * 1.5 + 0.5 });
+                        if (this.trail.length > 20) this.trail.shift();
+
+                        const distanceCovered = Math.hypot(this.x - (canvas.width / 2), this.y - canvas.height);
+                        if (distanceCovered >= this.distanceToTarget || this.y < this.targetY) {
+                            this.explode();
+                        } else {
+                            this.x += this.vx;
+                            this.y += this.vy;
+                        }
+                    } else {
+                        this.particles.forEach((particle, index) => {
+                            particle.update();
+                            if (particle.alpha <= 0) {
+                                this.particles.splice(index, 1);
+                            }
+                        });
+                    }
+                }
+
+                draw() {
+                    if (!this.exploded) {
+                        this.trail.forEach(p => {
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                            ctx.fillStyle = `hsla(${p.color || this.trailColor.match(/\d+/)[0]}, 100%, 70%, ${p.alpha})`; /* Use p.color if available, otherwise trailColor */
+                            ctx.fill();
+                            p.alpha -= 0.05;
+                        });
+
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                        ctx.fillStyle = 'white';
+                        ctx.fill();
+
+                    } else {
+                        this.particles.forEach(particle => particle.draw());
+                    }
+                }
+
+                explode() {
+                    this.exploded = true;
+                    const colors = [
+                        { r: 255, g: 255, b: 255 }, // White
+                        { r: 255, g: 0, b: 0 },     // Red
+                        { r: 0, g: 255, b: 0 },     // Green
+                        { r: 0, g: 0, b: 255 },     // Blue
+                        { r: 255, g: 255, b: 0 },   // Yellow
+                        { r: 255, g: 0, b: 255 },   // Magenta
+                        { r: 0, g: 255, b: 255 },   // Cyan
+                        { r: 255, g: 140, b: 0 }    // Orange (your theme color)
+                    ];
+
+                    for (let i = 0; i < 100; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const speed = Math.random() * 5 + 1;
+                        const vx = Math.cos(angle) * speed;
+                        const vy = Math.sin(angle) * speed;
+                        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                        this.particles.push(new Particle(this.x, this.y, vx, vy, randomColor));
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                fireworks.forEach((firecracker, index) => {
+                    firecracker.update();
+                    firecracker.draw();
+                    if (firecracker.exploded && firecracker.particles.length === 0) {
+                        fireworks.splice(index, 1);
+                    }
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            function createFirecracker() {
+                const startX = canvas.width / 2;
+                const startY = canvas.height;
+                const targetX = Math.random() * canvas.width;
+                const targetY = Math.random() * (canvas.height * 0.6) + (canvas.height * 0.1);
+
+                fireworks.push(new Firecracker(startX, startY, targetX, targetY));
+            }
+
+            setInterval(createFirecracker, 1500);
+            animate();
+        });
+    </script>
+</body>
+  </html>
+  
