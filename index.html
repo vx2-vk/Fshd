@@ -86,9 +86,8 @@
             font-size: 2em;
             color: var(--neon-orange);
             text-shadow: var(--glow-spread-strong);
-            margin-bottom: 20px;
+            margin-bottom: 5px; /* Reduced margin to bring closer to next line */
             line-height: 1.2;
-            /* Default state for animation */
             opacity: 1;
             transform: scale(1);
             transition: opacity 1s ease-out, transform 1s ease-out;
@@ -110,6 +109,17 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
+        /* New style for the personalized "from" message */
+        .personal-greeting-from {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.2em;
+            color: white;
+            margin-bottom: 25px; /* Space before input/buttons */
+            text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-orange);
+            min-height: 1.2em; /* Prevent layout shift */
+            display: none; /* Hidden by default */
+        }
+
         .user-name-display {
             font-family: 'Roboto Mono', monospace;
             font-size: 1.4em;
@@ -117,6 +127,7 @@
             margin-bottom: 25px;
             text-shadow: 0 0 8px #fff, 0 0 15px var(--neon-orange), 0 0 25px var(--neon-orange);
             min-height: 1.4em; /* To prevent layout shift when name is empty */
+            /* This div will now primarily show the name as the SENDER types it */
         }
 
         .name-input-group {
@@ -195,6 +206,12 @@
             font-size: 1.3em;
         }
 
+        .emoji {
+            font-size: 1.2em; /* Slightly larger emojis */
+            vertical-align: middle;
+            margin: 0 5px;
+        }
+
         /* Responsive adjustments for overall layout */
         @media (max-width: 480px) {
             .container {
@@ -204,6 +221,10 @@
 
             .greeting-message {
                 font-size: 1.6em;
+            }
+
+            .personal-greeting-from {
+                font-size: 1em;
             }
 
             .goddess-image {
@@ -225,6 +246,12 @@
             .container {
                 padding: 15px;
             }
+            .greeting-message {
+                font-size: 1.4em;
+            }
+            .personal-greeting-from {
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
@@ -236,7 +263,17 @@
         <!-- GIF -->
         <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXd0a2p1ZjBmZGt0Nmo2NnRnb3UzencxamV3YjgwbHBoeGVuaHM4ayZlcD1wMV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ErwOniUoUCjUCteUln/giphy.gif" alt="Festive Celebration GIF" class="goddess-image">
 
-        <div class="greeting-message" id="greetingMessage">మీకు శుభదీపావళి శుభాకాంక్షలు!</div>
+        <!-- Main festive greeting with emojis -->
+        <div class="greeting-message" id="greetingMessage">
+            <span class="emoji">🎇</span> మీకు శుభదీపావళి శుభాకాంక్షలు! <span class="emoji">🪔</span>
+        </div>
+
+        <!-- Personalized greeting from sender (initially hidden, shown when ?from= is present) -->
+        <div class="personal-greeting-from" id="personalGreetingFrom">
+            <!-- Content set by JS: "Vamsi Krishna తరఫున మీకు శుభాకాంక్షలు!" -->
+        </div>
+
+        <!-- This div will now show the name being typed by the current user (sender) -->
         <div class="user-name-display" id="userNameDisplay"></div>
 
         <div class="name-input-group">
@@ -258,10 +295,10 @@
             const nameInput = document.getElementById('nameInput');
             const userNameDisplay = document.getElementById('userNameDisplay');
             const whatsappShareButton = document.getElementById('whatsappShareButton');
-            const greetingMessageElement = document.getElementById('greetingMessage'); // New element reference
+            const greetingMessageElement = document.getElementById('greetingMessage');
+            const personalGreetingFromElement = document.getElementById('personalGreetingFrom'); // New element reference
 
             // --- URL Parameter and Name Logic ---
-            // Changed parameter name from 'name' to 'from'
             const getUrlParameter = (paramName) => {
                 paramName = paramName.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
                 const regex = new RegExp('[\\?&]' + paramName + '=([^&#]*)');
@@ -271,34 +308,38 @@
 
             const fromName = getUrlParameter('from'); // Check for 'from' parameter
             if (fromName) {
-                // If 'from' parameter exists (friend opened the link)
-                userNameDisplay.textContent = fromName; // Display sender's name
+                // Scenario: Friend opened the link
+                userNameDisplay.textContent = ''; // Clear dynamic name display
                 nameInput.value = ''; // Clear input for friend to type their name
                 nameInput.placeholder = 'మీ పేరు టైప్ చేయండి'; // Ensure placeholder is correct
 
-                // Update greeting message with sender's name
-                greetingMessageElement.textContent = `మీకు శుభదీపావళి శుభాకాంక్షలు, ${fromName} నుండి!`;
-                // Add animation class to greeting message
+                // Set personalized "from" message
+                personalGreetingFromElement.textContent = `${fromName} తరఫున మీకు శుభాకాంక్షలు!`;
+                personalGreetingFromElement.style.display = 'block'; // Show the personalized message
+
+                // Add welcome animation to the main greeting
                 greetingMessageElement.classList.add('greeting-animated');
 
-                // Show WhatsApp button immediately
-                whatsappShareButton.style.display = 'flex';
+                whatsappShareButton.style.display = 'flex'; // Show WhatsApp button
                 updateShareLinks(); // Update share links with current state
             } else {
-                // If no 'from' parameter (original sender)
+                // Scenario: Original sender (or no 'from' parameter)
                 userNameDisplay.textContent = ''; // No name displayed initially
                 nameInput.value = ''; // Ensure input is empty
                 nameInput.placeholder = 'మీ పేరు టైప్ చేయండి'; // Default placeholder
 
-                // Default greeting message
-                greetingMessageElement.textContent = 'మీకు శుభదీపావళి శుభాకాంక్షలు!';
+                personalGreetingFromElement.style.display = 'none'; // Hide personalized message
+
                 greetingMessageElement.classList.remove('greeting-animated'); // Ensure animation class is not present
 
                 whatsappShareButton.style.display = 'none'; // Hide WhatsApp button
             }
 
             nameInput.addEventListener('input', () => {
+                // When sender types, display their name in userNameDisplay
                 userNameDisplay.textContent = nameInput.value;
+                // Hide the "from" message if the user starts typing to create a new link
+                personalGreetingFromElement.style.display = 'none';
                 updateShareLinks();
                 // Show WhatsApp button if user starts typing, hide if input is empty
                 if (nameInput.value.trim() !== '') {
@@ -316,7 +357,7 @@
                 const linkToShare = currentName ? `${baseUrl}?from=${encodeURIComponent(currentName)}` : baseUrl;
 
                 // Message for WhatsApp
-                const whatsappText = `మీకు శుభదీపావళి శుభాకాంక్షలు, ${currentName || 'అందరికీ'}! ఈ శుభాకాంక్షలు చూడండి: `;
+                const whatsappText = `మీకు శుభదీపావళి శుభాకాంక్షలు! ${currentName ? currentName + ' తరఫున మీకు శుభాకాంక్షలు!' : ''} ఈ శుభాకాంక్షలు చూడండి: `;
                 whatsappShareButton.href = `https://wa.me/?text=${encodeURIComponent(whatsappText)}${encodeURIComponent(linkToShare)}`;
             };
 
@@ -406,7 +447,6 @@
                         this.trail.push({ x: this.x, y: this.y, alpha: 1, size: Math.random() * 1.5 + 0.5 });
                         if (this.trail.length > 20) this.trail.shift();
 
-                        // Check if rocket has reached or passed its target Y coordinate
                         if (this.y <= this.targetY) {
                             this.explode();
                         } else {
@@ -451,7 +491,7 @@
                         { r: 0, g: 255, b: 0 },     // Green
                         { r: 0, g: 0, b: 255 },     // Blue
                         { r: 255, g: 255, b: 0 },   // Yellow
-                        { r: 255, g: 0, b: 255 },   // Magenta
+                        { r: 255, g: 0, b: 255 }, 
                         { r: 0, g: 255, b: 255 },   // Cyan
                         { r: 255, g: 140, b: 0 }    // Orange (your theme color)
                     ];
@@ -491,12 +531,8 @@
             }
 
             setInterval(createFirecracker, 1500);
-            ananimateimate();
-
-});
-
-</script>
-
+            animate();
+        });
+    </script>
 </body>
-
 </html>
